@@ -22,6 +22,13 @@ use Illuminate\Contracts\Routing\Registrar;
 class SetupRoutes
 {
     /**
+     * Defines if these routes are for the browser.
+     *
+     * @var bool
+     */
+    public static $browser = true;
+
+    /**
      * Define the setup routes.
      *
      * @param \Illuminate\Contracts\Routing\Registrar $router
@@ -31,27 +38,12 @@ class SetupRoutes
     public function map(Registrar $router)
     {
         $router->group([
-            'middleware' => ['web', 'setup'],
+            'middleware' => ['setup'],
             'prefix'     => 'setup',
         ], function (Registrar $router) {
             $router->get('/', [
                 'as'   => 'get:setup',
                 'uses' => 'SetupController@getIndex',
-            ]);
-
-            $router->post('step1', [
-                'as'   => 'post:setup.step1',
-                'uses' => 'SetupController@postStep1',
-            ]);
-
-            $router->post('step2', [
-                'as'   => 'post:setup.step2',
-                'uses' => 'SetupController@postStep2',
-            ]);
-
-            $router->post('step3', [
-                'as'   => 'post:setup.step3',
-                'uses' => 'SetupController@postStep3',
             ]);
         });
     }

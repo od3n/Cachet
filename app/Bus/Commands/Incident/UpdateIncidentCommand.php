@@ -13,6 +13,13 @@ namespace CachetHQ\Cachet\Bus\Commands\Incident;
 
 use CachetHQ\Cachet\Models\Incident;
 
+/**
+ * This is the update incident command.
+ *
+ * @author James Brooks <james@alt-three.com>
+ * @author Joseph Cohem <joe@alt-three.com>
+ * @author Graham Campbell <graham@alt-three.com>
+ */
 final class UpdateIncidentCommand
 {
     /**
@@ -79,11 +86,11 @@ final class UpdateIncidentCommand
     public $stickied;
 
     /**
-     * The date that the incident occurred on.
+     * The timestamp that the incident occurred at.
      *
-     * @var string
+     * @var string|null
      */
-    public $incident_date;
+    public $occurred_at;
 
     /**
      * A given incident template.
@@ -100,20 +107,29 @@ final class UpdateIncidentCommand
     public $template_vars;
 
     /**
+     * Meta key/value pairs.
+     *
+     * @var array
+     */
+    public $meta = [];
+
+    /**
      * The validation rules.
      *
      * @var string[]
      */
     public $rules = [
-        'name'             => 'string',
-        'status'           => 'int|min:0|max:4',
-        'message'          => 'string',
-        'visible'          => 'bool',
-        'component_id'     => 'int',
-        'component_status' => 'int|min:1|max:4|required_with:component_id',
-        'notify'           => 'bool',
-        'stickied'         => 'bool',
-        'template'         => 'string',
+        'name'             => 'nullable|string',
+        'status'           => 'nullable|int|min:0|max:4',
+        'message'          => 'nullable|string',
+        'visible'          => 'nullable|bool',
+        'component_id'     => 'nullable|int',
+        'component_status' => 'nullable|int|min:0|max:4|required_with:component_id',
+        'notify'           => 'nullable|bool',
+        'stickied'         => 'nullable|bool',
+        'occurred_at'      => 'nullable|string',
+        'template'         => 'nullable|string',
+        'meta'             => 'nullable|array',
     ];
 
     /**
@@ -128,13 +144,14 @@ final class UpdateIncidentCommand
      * @param int                              $component_status
      * @param bool                             $notify
      * @param bool                             $stickied
-     * @param string|null                      $incident_date
+     * @param string|null                      $occurred_at
      * @param string|null                      $template
      * @param array                            $template_vars
+     * @param array                            $meta
      *
      * @return void
      */
-    public function __construct(Incident $incident, $name, $status, $message, $visible, $component_id, $component_status, $notify, $stickied, $incident_date, $template, array $template_vars = [])
+    public function __construct(Incident $incident, $name, $status, $message, $visible, $component_id, $component_status, $notify, $stickied, $occurred_at, $template, array $template_vars = [], array $meta = [])
     {
         $this->incident = $incident;
         $this->name = $name;
@@ -145,8 +162,9 @@ final class UpdateIncidentCommand
         $this->component_status = $component_status;
         $this->notify = $notify;
         $this->stickied = $stickied;
-        $this->incident_date = $incident_date;
+        $this->occurred_at = $occurred_at;
         $this->template = $template;
         $this->template_vars = $template_vars;
+        $this->meta = $meta;
     }
 }

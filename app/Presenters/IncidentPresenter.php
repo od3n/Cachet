@@ -11,11 +11,11 @@
 
 namespace CachetHQ\Cachet\Presenters;
 
-use CachetHQ\Cachet\Dates\DateFactory;
+use CachetHQ\Cachet\Models\Incident;
 use CachetHQ\Cachet\Presenters\Traits\TimestampsTrait;
+use CachetHQ\Cachet\Services\Dates\DateFactory;
 use GrahamCampbell\Markdown\Facades\Markdown;
 use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Support\Facades\Config;
 use McCool\LaravelAutoPresenter\BasePresenter;
 
 class IncidentPresenter extends BasePresenter implements Arrayable
@@ -23,7 +23,21 @@ class IncidentPresenter extends BasePresenter implements Arrayable
     use TimestampsTrait;
 
     /**
-     * Inciden icon lookup.
+     * The date factory instance.
+     *
+     * @var \CachetHQ\Cachet\Services\Dates\DateFactory
+     */
+    protected $dates;
+
+    /**
+     * Flag for the latest function.
+     *
+     * @var bool
+     */
+    protected $latest = false;
+
+    /**
+     * Incident icon lookup.
      *
      * @var array
      */
@@ -36,11 +50,24 @@ class IncidentPresenter extends BasePresenter implements Arrayable
     ];
 
     /**
+     * Create a new presenter.
+     *
+     * @param \CachetHQ\Cachet\Services\Dates\DateFactory $dates
+     * @param \CachetHQ\Cachet\Models\Incident            $resource
+     *
+     * @return void
+     */
+    public function __construct(DateFactory $dates, Incident $resource)
+    {
+        $this->dates = $dates;
+    }
+
+    /**
      * Renders the message from Markdown into HTML.
      *
      * @return string
      */
-    public function formattedMessage()
+    public function formatted_message()
     {
         return Markdown::convertToHtml($this->wrappedObject->message);
     }
@@ -52,7 +79,57 @@ class IncidentPresenter extends BasePresenter implements Arrayable
      */
     public function raw_message()
     {
-        return strip_tags($this->formattedMessage());
+        return strip_tags($this->formatted_message());
+    }
+
+    /**
+     * Present formatted occurred_at date time.
+     *
+     * @return string
+     */
+    public function occurred_at()
+    {
+        return $this->dates->make($this->wrappedObject->occurred_at)->toDateTimeString();
+    }
+
+    /**
+     * Present diff for humans date time.
+     *
+     * @return string
+     */
+    public function occurred_at_diff()
+    {
+        return $this->dates->make($this->wrappedObject->occurred_at)->diffForHumans();
+    }
+
+    /**
+     * Present formatted date time.
+     *
+     * @return string
+     */
+    public function occurred_at_formatted()
+    {
+        return ucfirst($this->dates->make($this->wrappedObject->occurred_at)->format($this->incidentDateFormat()));
+    }
+
+    /**
+     * Formats the occurred_at time ready to be used by bootstrap-datetimepicker.
+     *
+     * @return string
+     */
+    public function occurred_at_datetimepicker()
+    {
+        return $this->dates->make($this->wrappedObject->occurred_at)->format('Y-m-d H:i');
+    }
+
+    /**
+     * Present formatted date time.
+     *
+     * @return string
+     */
+    public function occurred_at_iso()
+    {
+        return $this->dates->make($this->wrappedObject->occurred_at)->toISO8601String();
     }
 
     /**
@@ -62,7 +139,7 @@ class IncidentPresenter extends BasePresenter implements Arrayable
      */
     public function created_at_diff()
     {
-        return app(DateFactory::class)->make($this->wrappedObject->created_at)->diffForHumans();
+        return $this->dates->make($this->wrappedObject->created_at)->diffForHumans();
     }
 
     /**
@@ -72,17 +149,7 @@ class IncidentPresenter extends BasePresenter implements Arrayable
      */
     public function created_at_formatted()
     {
-        return ucfirst(app(DateFactory::class)->make($this->wrappedObject->created_at)->format(Config::get('setting.incident_date_format', 'l jS F Y H:i:s')));
-    }
-
-    /**
-     * Formats the created_at time ready to be used by bootstrap-datetimepicker.
-     *
-     * @return string
-     */
-    public function created_at_datetimepicker()
-    {
-        return app(DateFactory::class)->make($this->wrappedObject->created_at)->format('d/m/Y H:i');
+        return ucfirst($this->dates->make($this->wrappedObject->created_at)->format($this->incidentDateFormat()));
     }
 
     /**
@@ -92,57 +159,7 @@ class IncidentPresenter extends BasePresenter implements Arrayable
      */
     public function created_at_iso()
     {
-        return app(DateFactory::class)->make($this->wrappedObject->created_at)->toISO8601String();
-    }
-
-    /**
-     * Present formatted date time.
-     *
-     * @return string
-     */
-    public function scheduled_at()
-    {
-        return app(DateFactory::class)->make($this->wrappedObject->scheduled_at)->toDateTimeString();
-    }
-
-    /**
-     * Present diff for humans date time.
-     *
-     * @return string
-     */
-    public function scheduled_at_diff()
-    {
-        return app(DateFactory::class)->make($this->wrappedObject->scheduled_at)->diffForHumans();
-    }
-
-    /**
-     * Present formatted date time.
-     *
-     * @return string
-     */
-    public function scheduled_at_formatted()
-    {
-        return ucfirst(app(DateFactory::class)->make($this->wrappedObject->scheduled_at)->format(Config::get('setting.incident_date_format', 'l jS F Y H:i:s')));
-    }
-
-    /**
-     * Present formatted date time.
-     *
-     * @return string
-     */
-    public function scheduled_at_iso()
-    {
-        return app(DateFactory::class)->make($this->wrappedObject->scheduled_at)->toISO8601String();
-    }
-
-    /**
-     * Formats the scheduled_at time ready to be used by bootstrap-datetimepicker.
-     *
-     * @return string
-     */
-    public function scheduled_at_datetimepicker()
-    {
-        return app(DateFactory::class)->make($this->wrappedObject->scheduled_at)->format('d/m/Y H:i');
+        return $this->dates->make($this->wrappedObject->created_at)->toISO8601String();
     }
 
     /**
@@ -152,11 +169,7 @@ class IncidentPresenter extends BasePresenter implements Arrayable
      */
     public function timestamp_formatted()
     {
-        if ($this->wrappedObject->is_scheduled) {
-            return $this->scheduled_at_formatted;
-        }
-
-        return $this->created_at_formatted;
+        return $this->occurred_at_formatted;
     }
 
     /**
@@ -166,11 +179,7 @@ class IncidentPresenter extends BasePresenter implements Arrayable
      */
     public function timestamp_iso()
     {
-        if ($this->wrappedObject->is_scheduled) {
-            return $this->scheduled_at_iso;
-        }
-
-        return $this->created_at_iso;
+        return $this->occurred_at_iso;
     }
 
     /**
@@ -246,9 +255,11 @@ class IncidentPresenter extends BasePresenter implements Arrayable
      */
     public function latest()
     {
-        if ($update = $this->wrappedObject->updates()->orderBy('created_at', 'desc')->first()) {
-            return $update;
+        if (is_bool($this->latest)) {
+            $this->latest = $this->wrappedObject->updates()->first();
         }
+
+        return $this->latest;
     }
 
     /**
@@ -269,12 +280,20 @@ class IncidentPresenter extends BasePresenter implements Arrayable
     public function duration()
     {
         if ($update = $this->latest()) {
-            dd($update->created_at->diffInSeconds($this->wrappedObject->created_at));
-
-            return $this->wrappedObject->created_at->diffInSeconds($update->created_at);
+            return $this->wrappedObject->created_at->diffInSeconds($update->occurred_at);
         }
 
         return 0;
+    }
+
+    /**
+     * Return the meta in a key value pair.
+     *
+     * @return array
+     */
+    public function meta()
+    {
+        return $this->wrappedObject->meta->pluck('value', 'key')->all();
     }
 
     /**
@@ -292,7 +311,8 @@ class IncidentPresenter extends BasePresenter implements Arrayable
             'latest_icon'         => $this->latest_icon(),
             'permalink'           => $this->permalink(),
             'duration'            => $this->duration(),
-            'scheduled_at'        => $this->scheduled_at(),
+            'meta'                => $this->meta(),
+            'occurred_at'         => $this->occurred_at(),
             'created_at'          => $this->created_at(),
             'updated_at'          => $this->updated_at(),
         ]);

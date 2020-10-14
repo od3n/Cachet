@@ -44,12 +44,13 @@ class IncidentTemplate extends Model
      */
     public $rules = [
         'name'     => 'required|string',
-        'slug'     => 'string',
         'template' => 'required|string',
     ];
 
     /**
      * Overrides the models boot method.
+     *
+     * @return void
      */
     public static function boot()
     {
@@ -72,7 +73,7 @@ class IncidentTemplate extends Model
      */
     public static function forSlug($slug, $columns = ['*'])
     {
-        $template = static::where('slug', $slug)->firstOrFail($columns);
+        $template = static::where('slug', '=', $slug)->firstOrFail($columns);
 
         return $template;
     }

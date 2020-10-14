@@ -14,50 +14,31 @@ namespace CachetHQ\Tests\Cachet;
 use CachetHQ\Cachet\Models\User;
 use CachetHQ\Cachet\Settings\Cache;
 use CachetHQ\Cachet\Settings\Repository;
-use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Foundation\Testing\TestCase;
 
 /**
  * This is the abstract test case class.
  *
  * @author Graham Campbell <graham@alt-three.com>
+ * @author James Brooks <james@alt-three.com>
  */
 abstract class AbstractTestCase extends TestCase
 {
-    /**
-     * The base URL to use while testing the application.
-     *
-     * @var string
-     */
-    protected $baseUrl = 'http://localhost';
+    use CreatesApplicationTrait;
 
     /**
      * Test actor.
      *
-     * @var User
+     * @var \CachetHQ\Cachet\Models\User
      */
     protected $user;
 
     /**
-     * Creates the application.
-     *
-     * @return \Illuminate\Foundation\Application
-     */
-    public function createApplication()
-    {
-        $app = require __DIR__.'/../bootstrap/app.php';
-
-        $app->make(Kernel::class)->bootstrap();
-
-        return $app;
-    }
-
-    /**
      * Sign in an user if it's the case.
      *
-     * @param User|null $user
+     * @param \CachetHQ\Cachet\Models\User|null $user
      *
-     * @return AbstractTestCase
+     * @return \CachetHQ\Tests\Cachet\AbstractTestCase
      */
     protected function signIn(User $user = null)
     {
@@ -73,7 +54,7 @@ abstract class AbstractTestCase extends TestCase
      *
      * @param array $properties
      *
-     * @return User
+     * @return \CachetHQ\Cachet\Models\User
      */
     protected function createUser($properties = [])
     {
@@ -83,7 +64,7 @@ abstract class AbstractTestCase extends TestCase
     /**
      * Set up the needed configuration to be able to run the tests.
      *
-     * @return AbstractTestCase
+     * @return \CachetHQ\Tests\Cachet\AbstractTestCase
      */
     protected function setupConfig()
     {
